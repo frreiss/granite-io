@@ -103,7 +103,9 @@ class CertaintyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
         # I/O processor for the base model, which does most of the input formatting.
         self.base_input_processor = Granite3Point2InputProcessor()
 
-    def inputs_to_generate_inputs(self, inputs: ChatCompletionInputs) -> GenerateInputs:
+    def inputs_to_generate_inputs(
+        self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True
+    ) -> GenerateInputs:
         # Validate the input and convert to Granite input
         inputs = Granite3Point2Inputs.model_validate(inputs.model_dump())
 
@@ -112,10 +114,11 @@ class CertaintyIOProcessor(ModelDirectInputOutputProcessorWithGenerate):
             raise ValueError("Last message is not a user or assistant message")
 
         # The beginning of the prompt doesn't change relative to base Granite 3.2
-        prompt_prefix = self.base_input_processor.transform(inputs, False)
+        prompt = self.base_input_processor.transform(inputs, False)
 
         # Only the generation prompt portion changes
-        prompt = prompt_prefix + "<|start_of_role|>certainty<|end_of_role|>"
+        if add_generation_prompt:
+            prompt = prompt + "<|start_of_role|>certainty<|end_of_role|>"
         result = inputs.generate_inputs.model_copy(
             update={
                 "prompt": prompt,

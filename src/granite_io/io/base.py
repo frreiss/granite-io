@@ -205,12 +205,16 @@ class ModelDirectInputOutputProcessorWithGenerate(InputOutputProcessor):
         self._backend = backend
 
     @abc.abstractmethod
-    def inputs_to_generate_inputs(self, inputs: ChatCompletionInputs) -> GenerateInputs:
+    def inputs_to_generate_inputs(
+        self, inputs: ChatCompletionInputs, add_generation_prompt: bool = True
+    ) -> GenerateInputs:
         """
         Determine the best generation parameters (including prompt) to pass to the
         backend when running the specified chat completion.
 
         :param inputs: Structured representation of the inputs
+        :param add_generation_prompt: If true, the generated prompt will include the
+         appropriate response prefix to trigger generation.
 
         :returns: A copy of inputs.generate_inputs with appropriate modifications for
          the target model and with the ``prompt`` field populated with an appropriate
