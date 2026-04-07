@@ -110,6 +110,7 @@ def compute_embeddings(
     embedding_model_name: str,
     chunk_size: int = 512,
     overlap: int = 128,
+    local_files_only: bool = False,
 ):  # "-> pa.Table:"
     # pylint: disable=too-many-locals
     """
@@ -124,6 +125,8 @@ def compute_embeddings(
         sequence length.
     :param overlap: Target overlap between adjacent chunks, in embedding model tokens.
         Actual begins and ends of chunks will be on sentence boundaries.
+    :param local_files_only: If ``True``, don't attempt to download embedding models
+         that aren't cached.
 
     :returns: PyArrow Table of chunks of the corpus, with schema
         ````["id", "url", "title", "begin", "end", "text", "embedding"]``
@@ -136,7 +139,9 @@ def compute_embeddings(
         # Third Party
         import nltk
 
-    embedding_model = sentence_transformers.SentenceTransformer(embedding_model_name)
+    embedding_model = sentence_transformers.SentenceTransformer(
+        embedding_model_name, local_files_only=local_files_only
+    )
     sentence_splitter = nltk.tokenize.punkt.PunktSentenceTokenizer()
 
     # Corpora currently fit in memory, so just iterate with a for loop
